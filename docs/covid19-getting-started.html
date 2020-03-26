@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Alison Link" />
+
+<meta name="date" content="2020-03-26" />
+
+<title>COVID-19 data exploration: Getting started in R</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/pagedtable-1.1/css/pagedtable.css" rel="stylesheet" />
+<script src="site_libs/pagedtable-1.1/js/pagedtable.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">COVID-19 Data Exploration</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">
+    <span class="fas fa fas fa-head-side-virus"></span>
+     
+    Home
+  </a>
+</li>
+<li>
+  <a href="covid19-getting-started.html">Getting Started</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="http://www.opentwincities.org">Open Twin Cities</a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">COVID-19 data exploration: Getting started in R</h1>
+<h4 class="author">Alison Link</h4>
+<h4 class="date">2020-03-26</h4>
+
+</div>
+
+
+<div id="set-up-your-r-environment" class="section level2">
+<h2>Set up your R environment</h2>
+<ol style="list-style-type: decimal">
+<li><p>Download and install R from <a href="https://cran.r-project.org/">CRAN</a>.</p></li>
+<li><p>Download and install <a href="https://rstudio.com/products/rstudio/download/">RStudio</a>, the most widely-used IDE for creating cool things in R.</p></li>
+<li><p>Open up RStudio. From now on, this will be your gateway to R. RStudio will launch R behind the scenes. In RStudio, you can execute code line-by-line via the “Console” window (not recommended). Or, you can author R scripts or R Notebooks that allow you to save and run multi-line snippets of R code (very much recommended). If you save the code for your analyses within an R script file (*.R), or an R Markdown file (*.Rmd), it makes it easy to return to your work and reproduce your results later.</p></li>
+<li><p>In RStudio, copy the following lines of code into the “Console” and click [Enter] to run them. This will install the libraries you need to work with the data. You only need to run each of these lines of code once:</p></li>
+</ol>
+<pre class="r"><code>install.packages(&quot;readxl&quot;)
+install.packages(&quot;httr&quot;)
+install.packages(&quot;tidyverse&quot;)
+install.packages(&quot;ggplot2&quot;)
+install.packages(&quot;countrycode&quot;)
+install.packages(&quot;directlabels&quot;)</code></pre>
+<ol start="5" style="list-style-type: decimal">
+<li><p>Next, create an R script file: <strong>File</strong> &gt; <strong>New</strong> &gt; <strong>R Script</strong>. From now on, copy the lines of code from this tutorial into your script file and then save off the script file periodically to save a record of your analysis. Once the code is copied into your script file, you can run a line/section of the code by highlighting the section you want to execute and then clicking the **Run*&quot;** button in the upper right-hand corner of the script window. (Or, use [CMD] + [ENTER] as a keyboard shortcut to execute the code.)</p></li>
+<li><p>Before kicking off the analysis, first copy the following code into your R script file and run it. This loads the libraries you’ve just downloaded into your R environment so you can start using them. You will need to run this code every time you restart your R session:</p></li>
+</ol>
+<pre class="r"><code>library(readxl)
+library(httr)
+library(tidyverse)
+library(ggplot2)
+library(countrycode)
+library(directlabels)</code></pre>
+</div>
+<div id="the-data" class="section level2">
+<h2>The data</h2>
+<div id="load-the-data" class="section level3">
+<h3>Load the data</h3>
+<p>The European Center for Disease Prevention and Control hosts a dataset that is automatically updated every day. See the <a href="https://ourworldindata.org/covid-sources-comparison">Our World In Data</a> website for a discussion of different sources of COVID-19 data and why this dataset was chosen as a trustworty and accessible source. The <a href="https://www.ecdc.europa.eu/en/publications-data/download-todays-data-geographic-distribution-covid-19-cases-worldwide">ECDC’s data download website</a> has additional information about the data and an example template of how to load the data into R. Use the following code to download and read the data into R:</p>
+<pre class="r"><code>url &lt;- paste(&quot;https://www.ecdc.europa.eu/sites/default/files/documents/COVID-19-geographic-disbtribution-worldwide-&quot;, format((Sys.Date() - 1), &quot;%Y-%m-%d&quot;), &quot;.xlsx&quot;, sep = &quot;&quot;)
+
+# download the dataset from the website to a local temporary file
+GET(url, authenticate(&quot;:&quot;, &quot;:&quot;, type=&quot;ntlm&quot;), write_disk(filepath &lt;- tempfile(fileext = &quot;.xlsx&quot;)))</code></pre>
+<pre class="r"><code># Alternative: download into the data/ folder
+
+#filepath &lt;- paste(getwd(),&quot;/data/COVID-19-geographic-disbtribution-worldwide-&quot;, format(Sys.time(), &quot;%Y-%m-%d&quot;), &quot;.xlsx&quot;, sep = &quot;&quot;)
+#GET(url, authenticate(&quot;:&quot;, &quot;:&quot;, type=&quot;ntlm&quot;), write_disk(filepath))
+
+#read the Dataset sheet into R
+data &lt;- read_excel(filepath)</code></pre>
+<p>The data is now loaded into the “Environment” tab in RStudio. Look for the <code>data</code> object listed in there, indicating that the data is now stored in your computer’s memory as a data frame object. Click the blue arrow next to the <code>data</code> object and it will expand to show you all of the columns that are available in the data frame. If you click the icon that looks like a spreadsheet next to the <code>data</code> object, RStudio will open a new tab where you can view the entire dataset. You will notice that one of the columns is labeled “Countries and territories”. This is not great. R <em>hates</em> having spaces in column names, so this could cause us some headaches down the road. To fix this, let’s rename this column to just be called “Country”:</p>
+<pre class="r"><code>names(data)[7] &lt;- &quot;Country&quot;</code></pre>
+</div>
+<div id="understand-the-metrics" class="section level3">
+<h3>Understand the metrics</h3>
+<p>This dataset has two main metrics:</p>
+<ul>
+<li><p><strong>Cases</strong> = the count of newly-diagnosed cases since the previous day’s reporting period for a particular date/country</p></li>
+<li><p><strong>Deaths</strong> = the count of new deaths since the previous day’s reporting period for a particular date/country</p></li>
+</ul>
+<p>Note that these numbers represent are day-by-day counts of <em>new</em> incidents as they are reported. These numbers are very “raw”. There is nothing cumulative about these yet–we will eventually have to compute additional metrics to generate more interesting analyses.</p>
+</div>
+</div>
+<div id="exploratory-analysis" class="section level2">
+<h2>Exploratory Analysis</h2>
+<div id="daily-new-diagnoses" class="section level3">
+<h3>Daily new diagnoses</h3>
+<p>How many new cases have been diagnosed world wide within the last 24 hours?</p>
+<pre class="r"><code>data %&gt;% 
+  filter(DateRep == Sys.Date()) %&gt;%
+  summarise(total_sum_of_cases = sum(Cases))</code></pre>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":["total_sum_of_cases"],"name":[1],"type":["dbl"],"align":["right"]}],"data":[{"1":"0"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+<p>How many new cases diagnosed have been diagnosed in each country within the last 24 hours? (Note: Let’s filter for countries that had &gt; 10 new cases, so the chart doesn’t get too crowded.)</p>
+<pre class="r"><code>data %&gt;% filter(DateRep == Sys.Date() &amp; Cases &gt; 0) %&gt;%
+  mutate(Country = fct_reorder(Country, desc(Cases))) %&gt;%
+  filter(Cases &gt; 10) %&gt;%
+ggplot(., aes(x=Country, y=Cases)) +
+  geom_bar(stat=&quot;identity&quot;) +
+  geom_text(aes(label = Cases), angle = 90, hjust = -0.1, vjust = 0.5) +
+  theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5))</code></pre>
+<p><img src="covid19-getting-started_files/figure-html/unnamed-chunk-6-1.png" width="864" /></p>
+</div>
+<div id="total-cases-to-date" class="section level3">
+<h3>Total cases to date</h3>
+<p>How many total cases have been diagnosed world wide to date?</p>
+<pre class="r"><code>data %&gt;% 
+  summarise(total_sum_of_cases = sum(Cases))</code></pre>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":["total_sum_of_cases"],"name":[1],"type":["dbl"],"align":["right"]}],"data":[{"1":"416916"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+<p>How many cases have been diagnosed in each country to date? (Note: Let’s filter for countries that have had &gt; 100 cases, so the chart doesn’t get too crowded.)</p>
+<pre class="r"><code>data %&gt;% group_by(Country) %&gt;%
+  summarise(total_sum_of_cases = sum(Cases)) %&gt;%
+  filter(total_sum_of_cases &gt; 100) %&gt;%
+  mutate(Country = fct_reorder(Country, total_sum_of_cases)) %&gt;%
+ggplot(., aes(x=Country, y=total_sum_of_cases)) +
+  geom_bar(stat=&quot;identity&quot;) +
+  geom_text(aes(label = total_sum_of_cases), hjust = -0.1) +
+  scale_y_continuous(position = &quot;right&quot;) +
+  coord_flip() +
+  theme(axis.text.x=element_text(angle = 45, hjust = 0, vjust = 0.5))</code></pre>
+<p><img src="covid19-getting-started_files/figure-html/unnamed-chunk-8-1.png" width="768" /></p>
+<p>It would be nice to be able to break down these charts by continent. To do that, we can use an external dataset available as part of the <code>coutrycode</code> package to map the country codes in the <code>GeoId</code> column to their relevant continent values. We can add this into the data frame as a new column called <code>Continent</code>. Note that the <code>GeoId</code> values used in the dataset do not seem entirely consistent with any particular country code schema. So, we will try an iterative approach that combines three different coding schemas (European Central Bank (“ecb”), Eurostat (“eurostat”), and ISO 3-character (“iso3c”)) to look for a match. For any values that remain NA after the first attempt to match, we’ll try to map them using the next codebook, and then the next codebook:</p>
+<pre class="r"><code>data &lt;- data %&gt;%
+  mutate(Continent = countrycode(GeoId, origin = &quot;ecb&quot;, destination = &quot;continent&quot;)) %&gt;%
+  mutate(Continent = ifelse(is.na(Continent), countrycode(GeoId, origin = &quot;eurostat&quot;, destination = &quot;continent&quot;), Continent)) %&gt;%
+  mutate(Continent = ifelse(is.na(Continent), countrycode(GeoId, origin = &quot;iso3c&quot;, destination = &quot;continent&quot;), Continent)) %&gt;%
+  mutate(Continent = ifelse(GeoId == &#39;XK&#39;, &#39;Europe&#39;, Continent)) # Kosovo is the only country that didn&#39;t match in any coding schema, so we&#39;ll hand-code it as &#39;Europe&#39;</code></pre>
+<p>Now, let’s try the chart again, this time broken down by continent. Do you notice anything interesting?</p>
+<pre class="r"><code>data %&gt;% group_by(Continent, Country) %&gt;%
+  summarise(total_sum_of_cases = sum(Cases)) %&gt;%
+  #mutate(Country = fct_reorder(Country, total_sum_of_cases)) %&gt;% # can&#39;t figure out how to order by total_sum_of_cases within each Continent facet :-(
+  filter(total_sum_of_cases &gt; 0) %&gt;%
+ggplot(., aes(x=Country, y=total_sum_of_cases)) +
+  geom_bar(stat=&quot;identity&quot;) +
+  theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+  facet_wrap(~Continent, nrow=2, ncol=3, scales=&quot;free&quot;) +
+  coord_flip()</code></pre>
+<p><img src="covid19-getting-started_files/figure-html/unnamed-chunk-10-1.png" width="960" /></p>
+</div>
+<div id="death-rates" class="section level3">
+<h3>Death rates</h3>
+<p>Which countries are experiencing the highest death rates (i.e. number of deaths per total confirmed cases)? What do you notice about the countries with very high death rates? Are you surprised at all?</p>
+<pre class="r"><code>data %&gt;% group_by(Country) %&gt;%
+  summarise(total_sum_of_cases = sum(Cases),
+         total_sum_of_deaths = sum(Deaths),
+         overall_death_rate = round((total_sum_of_deaths / total_sum_of_cases) * 100, 3)) %&gt;%
+  filter(overall_death_rate &gt; 0) %&gt;%
+  ungroup() %&gt;%
+  mutate(Country = fct_reorder(Country, overall_death_rate)) %&gt;%
+ggplot(., aes(x=Country, y=overall_death_rate)) +
+  geom_bar(stat=&quot;identity&quot;) +
+  geom_text(aes(label=overall_death_rate), vjust=0.5, hjust = -0.1) +
+  theme(axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+  ylab(&quot;Death rate (as % of total confirmed cases)&quot;) +
+  coord_flip()</code></pre>
+<p><img src="covid19-getting-started_files/figure-html/unnamed-chunk-11-1.png" width="768" /></p>
+<p>It is important to note that at least part of the variability in death rate between countries may be attributable to: 1) the country’s <a href="https://www.businessinsider.com/coronavirus-death-rate-by-country-current-fatalities-compared-to-cases-2020-3">rate of testing/case detection</a>, and 2) the <a href="https://www.washingtonpost.com/world/europe/germany-coronavirus-death-rate/2020/03/24/76ce18e4-6d05-11ea-a156-0048b62cdb51_story.html">differences in which sub-populations were more heavily represented in the country’s initial infected group</a>.</p>
+</div>
+<div id="flattening-the-curves" class="section level3">
+<h3>Flattening the curves!</h3>
+<p>Of course, the question on everyone’s mind now is: “Which countries are ‘flattening the curve’?” To do this, we need to start by calculating the cumulative number of confirmed cases within each country at each date in the dataset:</p>
+<pre class="r"><code>data &lt;- data %&gt;%
+  arrange(Country, DateRep) %&gt;%
+  group_by(Country) %&gt;%
+  mutate(total_cumulative_cases = cumsum(Cases))</code></pre>
+<p>Now, let’s visualize the cumulative cases by country over time to see which countries have successfully “flattened their curves”. Does it look like we’re making progress?</p>
+<pre class="r"><code>ggplot(data, aes(x=as.Date(DateRep), y=total_cumulative_cases, col=Country)) +
+  geom_line() +
+  # add a label at the right end of the line (corresponding to sysdate)
+  # geom_label(data = subset(data, DateRep == as.Date(Sys.Date())),
+  #           aes(label = GeoId, colour = Country, x = as.Date(Sys.Date()), y = total_cumulative_cases),
+  #           hjust = 0.5, size=2.5, label.padding = unit(0.1, &quot;lines&quot;)) +
+  scale_x_date(date_breaks = &quot;1 week&quot;, date_labels = &quot;%b %d&quot;) +
+  facet_wrap(~ Continent, scales=&quot;free&quot;) +
+  theme(legend.position = &quot;none&quot;,
+        axis.text.x=element_text(angle = 90, hjust = 1, vjust = 0.5))</code></pre>
+<p><img src="covid19-getting-started_files/figure-html/unnamed-chunk-13-1.png" width="960" /></p>
+<p><strong>Bonus Challenge:</strong> Identify “turning point” dates for specific countries where they seem to have inflected their curves to become flatter. Then, search online to see: were there any policy changes the country enacted shortly before that time frame that could have contributed to this flattening?</p>
+</div>
+</div>
+<div id="references" class="section level2">
+<h2>References</h2>
+<div id="data" class="section level3">
+<h3>Data</h3>
+<ul>
+<li><a href="https://www.ecdc.europa.eu/en/publications-data/download-todays-data-geographic-distribution-covid-19-cases-worldwide">European Centre for Disease Prevention and Control (ECDC), “Download today’s data on the geographic distribution of COVID-19 cases worldwide”</a></li>
+</ul>
+</div>
+<div id="epidemiology-covid-19-information" class="section level3">
+<h3>Epidemiology &amp; COVID-19 information</h3>
+<ul>
+<li><p><a href="https://ourworldindata.org/covid-sources-comparison">Ritchie, H. et al. (19 March 2020), “COVID-19 deaths and cases: how do sources compare?”, <em>Our World In Data</em></a></p></li>
+<li><p><a href="https://ourworldindata.org/covid-testing">Ortiz-Ospina, E. &amp; Hasell, J. (20 March 2020), “How many tests for COVID-19 are being performed around the world?”, <em>Our World in Data</em></a></p></li>
+<li><p><a href="https://www.ft.com/coronavirus-latest">Coronavirus tracked: the latest figures as the pandemic spreads, <em>Financial Times</em></a> - Very nice visualizations!</p></li>
+<li><p><a href="http://91-divoc.com/">91-DIVOC</a> - Nice visualization that lets you flip between log and linear scales to better visualize changes in exponential growth rates</p></li>
+<li><p><a href="https://medium.com/@tomaspueyo/coronavirus-the-hammer-and-the-dance-be9337092b56">Pueyo, T. (19 March 2020), “Coronavirus: The Hammer and the Dance”, <em>Medium</em></a> - A very well-written policy/theory piece that makes a good argument for why it is important to act fast in a pandemic</p></li>
+<li><p><a href="https://gabgoh.github.io/COVID/index.html">Epidemic Calculator</a></p></li>
+<li><p><a href="https://www.forbes.com/sites/trevornace/2020/03/22/population-adjusted-coronavirus-cases-top-10-countries-compared/#72d1c949974f">Nace, T. (22 March 2020), “Population Adjusted Coronavirus Cases: Top 10 Countries Compared”, <em>Forbes</em></a></p></li>
+<li><p><a href="https://www.cdc.gov/publichealth101/epidemiology.html">“Introduction to Epidemiology”, <em>CDC</em></a></p></li>
+<li><p><a href="https://www.cdc.gov/csels/dsepd/ss1978/lesson4/section3.html">“Displaying Public Health Data”, <em>CDC</em></a></p></li>
+</ul>
+</div>
+<div id="r-resources" class="section level3">
+<h3>R resources</h3>
+<ul>
+<li><p><a href="https://www.r-graph-gallery.com/267-reorder-a-variable-in-ggplot2.html" class="uri">https://www.r-graph-gallery.com/267-reorder-a-variable-in-ggplot2.html</a></p></li>
+<li><p><a href="https://stackoverflow.com/questions/47510141/get-continent-name-from-country-name-in-r" class="uri">https://stackoverflow.com/questions/47510141/get-continent-name-from-country-name-in-r</a></p></li>
+<li><p><a href="https://stackoverflow.com/questions/29357612/plot-labels-at-ends-of-lines" class="uri">https://stackoverflow.com/questions/29357612/plot-labels-at-ends-of-lines</a></p></li>
+</ul>
+</div>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

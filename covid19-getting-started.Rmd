@@ -1,16 +1,16 @@
 ---
 title: 'COVID-19 data exploration: Getting started in R'
-author: "Alison Link (Open Twin Cities)"
+author: "Alison Link"
 date: "`r Sys.Date()`"
 output:
   html_document:
     df_print: paged
 
-knit: (function(input_file, encoding) {
-  out_dir <- '../docs';
-  rmarkdown::render(input_file,
-    encoding=encoding,
-    output_file=file.path(dirname(input_file), out_dir, 'covid19-getting-started.html'))})
+# knit: (function(input_file, encoding) {
+#   out_dir <- '../docs';
+#   rmarkdown::render(input_file,
+#     encoding=encoding,
+#     output_file=file.path(dirname(input_file), out_dir, 'covid19-getting-started.html'))})
 ---
 
 ```{r setup, include=FALSE}
@@ -57,13 +57,18 @@ library(directlabels)
 The European Center for Disease Prevention and Control hosts a dataset that is automatically updated every day.  See the [Our World In Data](https://ourworldindata.org/covid-sources-comparison) website for a discussion of different sources of COVID-19 data and why this dataset was chosen as a trustworty and accessible source.  The [ECDC's data download website](https://www.ecdc.europa.eu/en/publications-data/download-todays-data-geographic-distribution-covid-19-cases-worldwide) has additional information about the data and an example template of how to load the data into R.  Use the following code to download and read the data into R:
 
 ```{r, results='hide'}
-url <- paste("https://www.ecdc.europa.eu/sites/default/files/documents/COVID-19-geographic-disbtribution-worldwide-", format(Sys.time(), "%Y-%m-%d"), ".xlsx", sep = "")
+url <- paste("https://www.ecdc.europa.eu/sites/default/files/documents/COVID-19-geographic-disbtribution-worldwide-", format((Sys.Date() - 1), "%Y-%m-%d"), ".xlsx", sep = "")
 
 # download the dataset from the website to a local temporary file
-GET(url, authenticate(":", ":", type="ntlm"), write_disk(tf <- tempfile(fileext = ".xlsx")))
+GET(url, authenticate(":", ":", type="ntlm"), write_disk(filepath <- tempfile(fileext = ".xlsx")))
+
+# Alternative: download into the data/ folder
+
+#filepath <- paste(getwd(),"/data/COVID-19-geographic-disbtribution-worldwide-", format(Sys.time(), "%Y-%m-%d"), ".xlsx", sep = "")
+#GET(url, authenticate(":", ":", type="ntlm"), write_disk(filepath))
 
 #read the Dataset sheet into R
-data <- read_excel(tf)
+data <- read_excel(filepath)
 ```
 
 The data is now loaded into the "Environment" tab in RStudio.  Look for the `data` object listed in there, indicating that the data is now stored in your computer's memory as a data frame object.  Click the blue arrow next to the `data` object and it will expand to show you all of the columns that are available in the data frame.  If you click the icon that looks like a spreadsheet next to the `data` object, RStudio will open a new tab where you can view the entire dataset.  You will notice that one of the columns is labeled "Countries and territories". This is not great.  R *hates* having spaces in column names, so this could cause us some headaches down the road.  To fix this, let's rename this column to just be called "Country":
@@ -98,7 +103,7 @@ data %>%
 
 How many new cases diagnosed have been diagnosed in each country within the last 24 hours?  (Note: Let's filter for countries that had > 10 new cases, so the chart doesn't get too crowded.)
 
-```{r, fig.asp=0.8, fig.width=10}
+```{r, fig.asp=0.8, fig.width=9}
 data %>% filter(DateRep == Sys.Date() & Cases > 0) %>%
   mutate(Country = fct_reorder(Country, desc(Cases))) %>%
   filter(Cases > 10) %>%
@@ -200,9 +205,9 @@ Now, let's visualize the cumulative cases by country over time to see which coun
 ggplot(data, aes(x=as.Date(DateRep), y=total_cumulative_cases, col=Country)) +
   geom_line() +
   # add a label at the right end of the line (corresponding to sysdate)
-  geom_label(data = subset(data, DateRep == as.Date(Sys.Date())), 
-            aes(label = GeoId, colour = Country, x = as.Date(Sys.Date()), y = total_cumulative_cases), 
-            hjust = 0.5, size=2.5, label.padding = unit(0.1, "lines")) +
+  # geom_label(data = subset(data, DateRep == as.Date(Sys.Date())),
+  #           aes(label = GeoId, colour = Country, x = as.Date(Sys.Date()), y = total_cumulative_cases),
+  #           hjust = 0.5, size=2.5, label.padding = unit(0.1, "lines")) +
   scale_x_date(date_breaks = "1 week", date_labels = "%b %d") +
   facet_wrap(~ Continent, scales="free") +
   theme(legend.position = "none",

@@ -1,5 +1,10 @@
 ---
-title: "Home Page"
+title: "Welcome!"
 output: html_document
 ---
 
+```{r load_packages, message=FALSE, warning=FALSE, include=FALSE}
+library(fontawesome)
+```
+
+Please feel free to use, share, and contribute to these tutorials and visuals created by members of Open Twin Cities, a [Code for America Brigade](https://brigade.codeforamerica.org/) located in Minneapolis/St. Paul, Minnesota, USA.

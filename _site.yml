@@ -1,12 +1,16 @@
 name: "COVID-19 Data Exploration"
 output_dir: "docs"
 navbar:
-  title: "COVID-19 Data Exploration (Open Twin Cities)"
+  title: "COVID-19 Data Exploration"
   left:
     - text: "Home"
+      icon: fas fa-head-side-virus
       href: index.html
     - text: "Getting Started"
       href: covid19-getting-started.html
+  right:
+    - text: "Open Twin Cities"
+      href: "http://www.opentwincities.org"
 output:
   html_document:
     theme: cosmo
